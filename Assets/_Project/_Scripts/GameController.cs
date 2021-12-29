@@ -31,8 +31,11 @@ namespace VoidPixel
 
         private void OnEnable()
         {
-            if (instance == null) { instance = this; }
-            else { Destroy(this); }
+            if (GameController.instance == null) { GameController.instance = this; }
+            else
+            {
+                if (GameController.instance != this) { Destroy(this.gameObject); }
+            }
         }
 
         private void Start()
