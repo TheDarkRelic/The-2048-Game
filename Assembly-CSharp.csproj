@@ -85,6 +85,7 @@
      <Compile Include="Assets\_Project\_Scripts\GameController.cs" />
      <Compile Include="Assets\_Project\_Scripts\Cell.cs" />
      <Compile Include="Assets\_Project\_Scripts\Fill.cs" />
+     <Compile Include="Assets\_Project\_Scripts\AnimationHandler.cs" />
      <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />

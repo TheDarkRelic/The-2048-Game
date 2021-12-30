@@ -9,7 +9,7 @@ namespace VoidPixel
         public int Value;
         [SerializeField] TMP_Text valueTxt;
         [SerializeField] float speed = 1000;
-
+        [SerializeField] ParticleSystem combineParticles;
         Image image;
         bool hasCombined;
 
@@ -42,11 +42,13 @@ namespace VoidPixel
             Value *= 2;
             GameController.instance.UpdateScore(Value);
             valueTxt.text = Value.ToString();
+            combineParticles.Play();
 
             int colorIndex = GetColorIndex(Value);
             image.color = GameController.instance.fillColors[colorIndex];
 
             GameController.instance.WinCheck(Value);
+            
         }
 
         int GetColorIndex(int valueIn)

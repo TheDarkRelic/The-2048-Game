@@ -4,6 +4,7 @@ using Random = UnityEngine.Random;
 using TMPro;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
+using System.Collections;
 
 namespace VoidPixel
 {
@@ -17,6 +18,8 @@ namespace VoidPixel
         public int Score;
         int isGameOver;
 
+        [SerializeField] float nextMoveDelay = .25f;
+        [SerializeField] AnimationHandler animHandler;
         [SerializeField] GameObject gameOverPanel;
         [SerializeField] TMP_Text scoreTxt;
         [SerializeField] PlayerInput input;
@@ -25,7 +28,10 @@ namespace VoidPixel
         [SerializeField] int winningScore;
         [SerializeField] GameObject winPanel;
 
-        bool hasWon;
+        bool _hasWon;
+        bool isProcessingMove;
+
+        public bool IsProcessingMove { get { return isProcessingMove; } set { isProcessingMove = value; } }
 
         public Color[] fillColors;
 
@@ -38,6 +44,11 @@ namespace VoidPixel
             }
         }
 
+        private void OnDisable()
+        {
+            StopAllCoroutines();
+        }
+
         private void Start()
         {
             StartSpawnFill();
@@ -46,9 +57,11 @@ namespace VoidPixel
 
         private void Update()
         {
+            if (IsProcessingMove) { return; }
 
             if (input.Left)
             {
+                StartCoroutine(DelayNextInput());
                 Ticker = 0;
                 isGameOver = 0;
                 slide("Left");
@@ -56,6 +69,7 @@ namespace VoidPixel
 
             if (input.Right)
             {
+                StartCoroutine(DelayNextInput());
                 Ticker = 0;
                 isGameOver = 0;
                 slide("Right");
@@ -63,6 +77,7 @@ namespace VoidPixel
 
             if (input.Down)
             {
+                StartCoroutine(DelayNextInput());
                 Ticker = 0;
                 isGameOver = 0;
                 slide("Down");
@@ -70,11 +85,14 @@ namespace VoidPixel
             
             if (input.Up)
             {
+                StartCoroutine(DelayNextInput());
                 Ticker = 0;
                 isGameOver = 0;
                 slide("Up");
             }
         }
+
+
 
         public void SpawnFill()
         {
@@ -94,15 +112,13 @@ namespace VoidPixel
             }
             float chance = Random.Range(0.0f, 1.0f);
 
-            if (chance < 0.2f) { return; }
-            else if (chance < 0.8f)
+            if (chance < 0.8f)
             {
                 GameObject tempFill = Instantiate(fillPreFab, allCells[whichSpawn].transform);
                 Fill tempFillComponent = tempFill.GetComponent<Fill>();
                 allCells[whichSpawn].GetComponent<Cell>().fill = tempFillComponent;
                 tempFillComponent.UpdateFillValue(2);
-                TweenObjectScale(tempFill);
-
+                animHandler.TweenShakeScale(tempFill, .25f, .5f); // fix magic numbers
             }
             else
             {
@@ -110,16 +126,20 @@ namespace VoidPixel
                 Fill tempFillComponent = tempFill.GetComponent<Fill>();
                 allCells[whichSpawn].GetComponent<Cell>().fill = tempFillComponent;
                 tempFillComponent.UpdateFillValue(4);
-                TweenObjectScale(tempFill);
+                animHandler.TweenShakeScale(tempFill, .25f, .5f); // fix magic numbers
             }
+            
         }
 
-        private void TweenObjectScale(GameObject tempFill)
+        IEnumerator DelayNextInput()
         {
-            var tempTransform = tempFill.GetComponent<RectTransform>();
-            if (tempFill == null) { return; }
-            tempTransform.DOShakeScale(.25f, .5f, 10, 90, false);
-
+            if (!isProcessingMove)
+            {
+                IsProcessingMove = true;
+                yield return new WaitForSeconds(nextMoveDelay);
+                IsProcessingMove = false;
+            }
+            yield break;
         }
 
         public void StartSpawnFill()
@@ -153,12 +173,12 @@ namespace VoidPixel
 
         public void WinCheck(int highestFill)
         {
-            if (hasWon) { return; }
+            if (_hasWon) { return; }
 
             if (highestFill == winningScore)
             {
                 winPanel.SetActive(true);
-                hasWon = true;
+                _hasWon = true;
             }
         }
 
