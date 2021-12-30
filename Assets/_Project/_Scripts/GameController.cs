@@ -18,15 +18,17 @@ namespace VoidPixel
         public int Score;
         int isGameOver;
 
-        [SerializeField] float nextMoveDelay = .25f;
+        [SerializeField] Cell[] allCells;
+
+        [SerializeField] AudioManager audioManager;
         [SerializeField] AnimationHandler animHandler;
-        [SerializeField] GameObject gameOverPanel;
         [SerializeField] TMP_Text scoreTxt;
         [SerializeField] PlayerInput input;
         [SerializeField] GameObject fillPreFab;
-        [SerializeField] Cell[] allCells;
-        [SerializeField] int winningScore;
         [SerializeField] GameObject winPanel;
+        [SerializeField] GameObject gameOverPanel;
+        [SerializeField] int winningScore;
+        [SerializeField] float nextMoveDelay = .25f;
 
         bool _hasWon;
         bool isProcessingMove;
@@ -136,6 +138,11 @@ namespace VoidPixel
             if (!isProcessingMove)
             {
                 IsProcessingMove = true;
+                if (isGameOver < 16)
+                {
+                    audioManager.PlaySlideSound();
+                }
+                
                 yield return new WaitForSeconds(nextMoveDelay);
                 IsProcessingMove = false;
             }
