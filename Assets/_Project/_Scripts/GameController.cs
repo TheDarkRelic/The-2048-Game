@@ -15,11 +15,12 @@ namespace VoidPixel
 
         public static int Ticker;
         public static Action<string> slide;
-        public int Score;
+        public static int Score;
         int isGameOver;
 
         [SerializeField] Cell[] allCells;
 
+        [SerializeField] GameObject gameControllerPanel;
         [SerializeField] AudioManager audioManager;
         [SerializeField] AnimationHandler animHandler;
         [SerializeField] TMP_Text scoreTxt;
@@ -44,18 +45,31 @@ namespace VoidPixel
             {
                 if (GameController.instance != this) { Destroy(this.gameObject); }
             }
+
+            Cell.onCombine += PlayTileBreakSound;
+            Cell.onCombine += ShakeCamera;
         }
+
 
         private void OnDisable()
         {
             StopAllCoroutines();
+            Cell.onCombine -= PlayTileBreakSound;
+            Cell.onCombine -= ShakeCamera;
         }
 
         private void Start()
         {
+            SetLevelWinScore();
+
+            scoreTxt.text = Score.ToString();
+
             StartSpawnFill();
             StartSpawnFill();
+
+            input.enabled = true;
         }
+
 
         private void Update()
         {
@@ -95,6 +109,19 @@ namespace VoidPixel
         }
 
 
+        public void SetLevelWinScore()
+        {
+            var currentLevel = LevelManager.instance.GetLevel();
+            if (currentLevel > 7) { currentLevel = 7; }
+            if (currentLevel == 1) { winningScore = 32; }
+            else if (currentLevel == 1) { winningScore = 32; }
+            else if (currentLevel == 2) { winningScore = 64; }
+            else if (currentLevel == 3) { winningScore = 128; }
+            else if (currentLevel == 4) { winningScore = 256; }
+            else if (currentLevel == 5) { winningScore = 512; }
+            else if (currentLevel == 6) { winningScore = 1024; }
+            else if (currentLevel == 7) { winningScore = 2048; }
+        }
 
         public void SpawnFill()
         {
@@ -120,6 +147,7 @@ namespace VoidPixel
                 Fill tempFillComponent = tempFill.GetComponent<Fill>();
                 allCells[whichSpawn].GetComponent<Cell>().fill = tempFillComponent;
                 tempFillComponent.UpdateFillValue(2);
+                if (tempFill == null) { return; }
                 animHandler.TweenShakeScale(tempFill, .25f, .5f); // fix magic numbers
             }
             else
@@ -128,10 +156,17 @@ namespace VoidPixel
                 Fill tempFillComponent = tempFill.GetComponent<Fill>();
                 allCells[whichSpawn].GetComponent<Cell>().fill = tempFillComponent;
                 tempFillComponent.UpdateFillValue(4);
+                if (tempFill == null) { return; }
                 animHandler.TweenShakeScale(tempFill, .25f, .5f); // fix magic numbers
             }
             
         }
+        private void PlayTileBreakSound()
+        {
+            audioManager.PlayTileBreakSound();
+        }
+
+        private void ShakeCamera() {  }
 
         IEnumerator DelayNextInput()
         {
@@ -184,6 +219,9 @@ namespace VoidPixel
 
             if (highestFill == winningScore)
             {
+                StopAllCoroutines();
+                input.enabled = false;
+                LevelManager.instance.IncrimentLevel();
                 winPanel.SetActive(true);
                 _hasWon = true;
             }

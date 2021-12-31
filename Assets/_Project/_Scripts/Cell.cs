@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace VoidPixel
@@ -5,6 +6,9 @@ namespace VoidPixel
 
     public class Cell : MonoBehaviour
     {
+
+        public static Action onCombine;
+
 
         [SerializeField] float tileSpawnDelay = 0.2f;
 
@@ -77,13 +81,16 @@ namespace VoidPixel
                 }
                 if (nextCell.fill != null)
                 {
+                    // if value of tiles are the same
                     if (currentCell.fill.Value == nextCell.fill.Value)
                     {
+                        onCombine?.Invoke();
                         nextCell.fill.Double();
                         nextCell.fill.transform.SetParent(currentCell.transform);
                         currentCell.fill = nextCell.fill;
                         nextCell.fill = null;
                     }
+                    // If the values of the tiles are not the same
                     else if (currentCell.down.fill != nextCell.fill)
                     {
                         nextCell.fill.transform.SetParent(currentCell.down.transform);
@@ -94,6 +101,7 @@ namespace VoidPixel
             }
             else
             {
+                // Move to furthest cell
                 Cell nextCell = currentCell.down;
                 while (nextCell.down != null && nextCell.fill == null)
                 {
@@ -126,6 +134,7 @@ namespace VoidPixel
                 {
                     if (currentCell.fill.Value == nextCell.fill.Value)
                     {
+                        onCombine?.Invoke();
                         nextCell.fill.Double();
                         nextCell.fill.transform.SetParent(currentCell.transform);
                         currentCell.fill = nextCell.fill;
@@ -173,6 +182,7 @@ namespace VoidPixel
                 {
                     if (currentCell.fill.Value == nextCell.fill.Value)
                     {
+                        onCombine?.Invoke();
                         nextCell.fill.Double();
                         nextCell.fill.transform.SetParent(currentCell.transform);
                         currentCell.fill = nextCell.fill;
@@ -220,6 +230,7 @@ namespace VoidPixel
                 {
                     if (currentCell.fill.Value == nextCell.fill.Value)
                     {
+                        onCombine?.Invoke();
                         nextCell.fill.Double();
                         nextCell.fill.transform.SetParent(currentCell.transform);
                         currentCell.fill = nextCell.fill;
